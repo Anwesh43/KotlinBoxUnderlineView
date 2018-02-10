@@ -18,7 +18,7 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
     override fun onTouchEvent(event:MotionEvent):Boolean {
         when(event.action) {
             MotionEvent.ACTION_DOWN -> {
-
+                renderer.handleTap(event.x,event.y)
             }
         }
         return true
@@ -47,18 +47,18 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
             }
         }
     }
-    data class State(var scale:Float = 0f,var dir:Float = 0f,var prevScale:Float = 0f) {
+    data class State(var scale:Float = 0f,var dir:Float = 0f) {
         fun update(stopcb:()->Unit) {
             scale += 0.1f*dir
-            if(Math.abs(scale - prevScale) > 1) {
-                scale = prevScale + dir
+            if(Math.abs(scale) > 1) {
+                scale = 1f
                 dir = 0f
-                prevScale = scale
                 stopcb()
             }
         }
         fun startUpdating(startcb:()->Unit) {
             if(dir == 0f) {
+                scale = 0f
                 dir = 1f - 2*scale
                 startcb()
             }
@@ -85,7 +85,7 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
         fun draw(canvas:Canvas,paint:Paint) {
             position.executeCb {x,y ->
                 paint.color = Color.parseColor("#009688")
-                paint.strokeWidth = size/30
+                paint.strokeWidth = size/10
                 paint.strokeCap = Paint.Cap.ROUND
                 canvas.drawLine(x-size/2,y,x+size/2,y,paint)
             }
