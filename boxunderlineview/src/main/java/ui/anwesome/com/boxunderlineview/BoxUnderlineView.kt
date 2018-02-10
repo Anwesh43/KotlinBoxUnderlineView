@@ -135,4 +135,28 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
             }
         }
     }
+    data class Renderer(var view:BoxUnderlineView, var time:Int = 0) {
+        var boxContainer:BoxContainer?=null
+        val animator = Animator(view)
+        fun render(canvas:Canvas,paint:Paint) {
+            if(time == 0) {
+                val w = canvas.width.toFloat()
+                val h = canvas.height.toFloat()
+                boxContainer = BoxContainer(view.n,w,h)
+            }
+            canvas.drawColor(Color.parseColor("#212121"))
+            boxContainer?.draw(canvas,paint)
+            time++
+            animator?.animate {
+                boxContainer?.update {
+                    animator.stop()
+                }
+            }
+        }
+        fun handleTap(x:Float,y:Float) {
+            boxContainer?.handleTap(x,y,{
+                animator.start()
+            })
+        }
+    }
 }
