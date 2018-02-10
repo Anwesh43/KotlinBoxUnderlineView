@@ -56,4 +56,17 @@ class BoxUnderlineView(ctx:Context):View(ctx) {
             }
         }
     }
+    data class UnderlinePosition(var x:Float,var y:Float,var ox:Float = x,var dx:Float = x) {
+        val state = State()
+        fun update(stopcb:()->Unit) {
+            state.update(stopcb)
+            x = ox + (dx-ox)*state.scale
+        }
+        fun startUpdating(startcb:()->Unit) {
+            state.update(startcb)
+        }
+        fun executeCb(cb:(Float,Float)->Unit)  {
+            cb(x,y)
+        }
+    }
 }
