@@ -24,11 +24,15 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
         return true
     }
     data class Animator(var view:View, var animated:Boolean = false) {
+        var delay:Long = 50L
+        fun setDelayForDiff(diff:Int) {
+            delay = (12.5*diff).toLong()
+        }
         fun animate(updatecb: () -> Unit) {
             if (animated) {
                 updatecb()
                 try {
-                    Thread.sleep(50)
+                    Thread.sleep(delay)
                     view.invalidate()
                 } catch(ex: Exception) {
 
@@ -133,10 +137,14 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
                 stopcb(underline?.i?:0)
             }
         }
-        fun handleTap(x:Float,y:Float,startcb:()->Unit) {
+        fun handleTap(x:Float,y:Float,startcb:(Int)->Unit) {
             boxes.forEach {
-                if(it.handleTap(x,y)) {
-                    underline?.startUpdating(it.x,it.i,startcb)
+                val orig_i = underline?.i?:0
+                if(it.handleTap(x,y) && underline?.i?:0 != it.i) {
+                    underline?.startUpdating(it.x,it.i,{
+                        val diff = Math.abs(orig_i - it.i)
+                        startcb(diff)
+                    })
                     return
                 }
             }
@@ -162,6 +170,7 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
         }
         fun handleTap(x:Float,y:Float) {
             boxContainer?.handleTap(x,y,{
+                animator.setDelayForDiff(it)
                 animator.start()
             })
         }
