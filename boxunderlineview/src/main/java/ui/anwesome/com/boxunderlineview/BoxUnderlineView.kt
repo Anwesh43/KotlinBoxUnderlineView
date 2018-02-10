@@ -6,8 +6,9 @@ package ui.anwesome.com.boxunderlineview
 import android.view.*
 import android.content.*
 import android.graphics.*
+import java.util.concurrent.ConcurrentLinkedQueue
 
-class BoxUnderlineView(ctx:Context):View(ctx) {
+class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     override fun onDraw(canvas:Canvas) {
 
@@ -73,9 +74,12 @@ class BoxUnderlineView(ctx:Context):View(ctx) {
             cb(x,y)
         }
     }
-    data class Underline(var i:Int,var x:Float,var y:Float,var position:UnderlinePosition = UnderlinePosition(x,y)) {
-        fun draw(canvas:Canvas,paint:Paint,size:Float) {
+    data class Underline(var i:Int,var x:Float,var y:Float, var size:Float, var position:UnderlinePosition = UnderlinePosition(x,y)) {
+        fun draw(canvas:Canvas,paint:Paint) {
             position.executeCb {x,y ->
+                paint.color = Color.parseColor("#009688")
+                paint.strokeWidth = size/30
+                paint.strokeCap = Paint.Cap.ROUND
                 canvas.drawLine(x-size/2,y,x+size/2,y,paint)
             }
         }
@@ -92,11 +96,43 @@ class BoxUnderlineView(ctx:Context):View(ctx) {
             paint.color = Color.parseColor("#EF6C00")
             canvas.save()
             canvas.translate(x,y)
-            canvas.drawRect(RectF(-size/2,-size/2,size/2,size/2),paint)
+            canvas.drawRoundRect(RectF(-size/2,-size/2,size/2,size/2),size/4,size/4,paint)
             canvas.restore()
         }
         fun handleTap(x:Float,y:Float):Boolean = x >= this.x - size/2 && x <= this.x + size/2 &&
                 y >= this.y - size/2 && y <= this.y + size/2
     }
-    
+    data class BoxContainer(var n:Int,var w:Float,var h:Float) {
+        val boxes:ConcurrentLinkedQueue<Box> = ConcurrentLinkedQueue()
+        var underline:Underline ?= null
+        init {
+            var gap = 2*w/(3*n-1)
+            var x = gap/2
+            var y = h/2
+            underline = Underline(0,x,y+gap,2*gap/3)
+            for(i in 1..n) {
+                boxes.add(Box(i,x,y,gap))
+                x += 3*gap/2
+            }
+        }
+        fun draw(canvas:Canvas,paint:Paint) {
+            boxes.forEach {
+                it.draw(canvas,paint)
+            }
+            underline?.draw(canvas,paint)
+        }
+        fun update(stopcb:(Int)->Unit) {
+            underline?.update {
+                stopcb(underline?.i?:0)
+            }
+        }
+        fun handleTap(x:Float,y:Float,startcb:()->Unit) {
+            boxes.forEach {
+                if(it.handleTap(x,y)) {
+                    underline?.startUpdating(it.x,it.i,startcb)
+                    return
+                }
+            }
+        }
+    }
 }
