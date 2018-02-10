@@ -3,6 +3,7 @@ package ui.anwesome.com.boxunderlineview
 /**
  * Created by anweshmishra on 10/02/18.
  */
+import android.app.Activity
 import android.view.*
 import android.content.*
 import android.graphics.*
@@ -10,10 +11,16 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val renderer = Renderer(this)
     override fun onDraw(canvas:Canvas) {
-
+        renderer.render(canvas,paint)
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
+        when(event.action) {
+            MotionEvent.ACTION_DOWN -> {
+
+            }
+        }
         return true
     }
     data class Animator(var view:View, var animated:Boolean = false) {
@@ -157,6 +164,13 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
             boxContainer?.handleTap(x,y,{
                 animator.start()
             })
+        }
+    }
+    companion object {
+        fun create(activity:Activity, n:Int):BoxUnderlineView {
+            val view = BoxUnderlineView(activity,n)
+            activity.setContentView(view)
+            return view
         }
     }
 }
