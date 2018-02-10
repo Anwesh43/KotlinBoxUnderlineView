@@ -87,4 +87,16 @@ class BoxUnderlineView(ctx:Context):View(ctx) {
             this.i = i
         }
     }
+    data class Box(var i:Int,var x:Float,var y:Float,var size:Float) {
+        fun draw(canvas:Canvas,paint:Paint) {
+            paint.color = Color.parseColor("#EF6C00")
+            canvas.save()
+            canvas.translate(x,y)
+            canvas.drawRect(RectF(-size/2,-size/2,size/2,size/2),paint)
+            canvas.restore()
+        }
+        fun handleTap(x:Float,y:Float):Boolean = x >= this.x - size/2 && x <= this.x + size/2 &&
+                y >= this.y - size/2 && y <= this.y + size/2
+    }
+    
 }
