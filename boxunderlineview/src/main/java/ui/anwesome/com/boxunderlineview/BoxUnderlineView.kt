@@ -12,6 +12,10 @@ import java.util.concurrent.ConcurrentLinkedQueue
 class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val renderer = Renderer(this)
+    var boxSelectionListener:BoxSelectionListener ?= null
+    fun addBoxSelectionListener(onSelect:(Int)->Unit) {
+        boxSelectionListener = BoxSelectionListener(onSelect)
+    }
     override fun onDraw(canvas:Canvas) {
         renderer.render(canvas,paint)
     }
@@ -164,6 +168,7 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
             time++
             animator?.animate {
                 boxContainer?.update {
+                    view.boxSelectionListener?.onSelect?.invoke(it)
                     animator.stop()
                 }
             }
@@ -182,4 +187,5 @@ class BoxUnderlineView(ctx:Context,var n:Int):View(ctx) {
             return view
         }
     }
+    data class BoxSelectionListener(var onSelect:(Int)->Unit)
 }
